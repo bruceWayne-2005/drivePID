@@ -48,7 +48,7 @@ void readEncoder5(){readEncoder(5);}
 // PID
 double pwm[6] = {0};
 double setTps[6];
-double Kp = 0.5, Ki = 0.2, Kd = 0.0;
+double Kp = 0.05, Ki = 0.2, Kd = 0.0;
 
 PID motor0(&tps[0], &pwm[0], &setTps[0], Kp, Ki, Kd, DIRECT);
 PID motor1(&tps[1], &pwm[1], &setTps[1], Kp, Ki, Kd, DIRECT);
@@ -100,7 +100,7 @@ void setup(){
 void loop(){
     // Update tps of every motor
     unsigned long currT = millis();
-    if (currT - prevT >= 100){ // every 10 ms
+    if (currT - prevT >= 10){ // every 10 ms
         noInterrupts();
         long ticks[6];
         for (int i = 0; i < 6; i++){
