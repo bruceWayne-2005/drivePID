@@ -3,8 +3,8 @@
 
 
 // Motor Ctrl pin definitions
-uint32_t dirPins[6] = {PC10, PC12, PC15, PH0, PC2, PC3};
-uint32_t pwmPins[6] = {PC11, PD2, PA0, PA1, PC1, PC0};
+uint32_t dirPins[6] = {PC4, PC12, PD2, PC11, PC2, PC10};
+uint32_t pwmPins[6] = {PA8, PB0, PA0, PA1, PB1, PA9};
 
 void setMotor(int i, int pwm){
     if(pwm >= 0){
@@ -46,8 +46,9 @@ void readEncoder5(){readEncoder(5);}
 
 
 // PID
-double pwm[6], setTps[6];
-double Kp = 0.8, Ki = 0.1, Kd = 0.4;
+double pwm[6] = {0};
+double setTps[6];
+double Kp = 0.5, Ki = 0.2, Kd = 0.0;
 
 PID motor0(&tps[0], &pwm[0], &setTps[0], Kp, Ki, Kd, DIRECT);
 PID motor1(&tps[1], &pwm[1], &setTps[1], Kp, Ki, Kd, DIRECT);
@@ -61,7 +62,6 @@ PID motor5(&tps[5], &pwm[5], &setTps[5], Kp, Ki, Kd, DIRECT);
 void setup(){
     Serial.begin(115200);
 
-    
     // PinMode Setup
     for (int i = 0; i < 6; i++){
         pinMode(dirPins[i], OUTPUT);
@@ -100,7 +100,7 @@ void setup(){
 void loop(){
     // Update tps of every motor
     unsigned long currT = millis();
-    if (currT - prevT >= 10){ // every 10 ms
+    if (currT - prevT >= 100){ // every 10 ms
         noInterrupts();
         long ticks[6];
         for (int i = 0; i < 6; i++){
@@ -134,16 +134,18 @@ void loop(){
         }
         Serial.println();
 
-
         for (int i = 0; i < 6; i++){
-            if (pwm[i] > 50 || pwm[i] < -50){
-                setMotor(i, pwm[i]);
-            }
-            else{
-                setMotor(i, 0);
-            }
+            setMotor(i, pwm[i]);
         }
         
-        Serial.println();
     }
+
+    /*for (int i = -255; i < 256; i++){
+        setMotor(5, i);
+        delay(10);
+    }
+    for (int i = 255; i >= -255; i--){
+        setMotor(5, i);
+        delay(10);
+    }*/
 }
