@@ -4,7 +4,7 @@
 
 // Motor Ctrl pin definitions
 uint32_t dirPins[6] = {PC4, PC12, PD2, PC11, PC2, PC10};
-uint32_t pwmPins[6] = {PA8, PB0, PA0, PA1, PB1, PA9};
+uint32_t pwmPins[6] = {PA8, PB0, PA0, PA1, PB1, PB6};
 
 void setMotor(int i, int pwm){
     if(pwm >= 0){
