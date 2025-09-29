@@ -2,7 +2,15 @@
 #include <PID_v1.h>
 
 
-// Motor Ctrl pin definitions
+// Constants
+#define pi 3.14
+#define ENCPR 1320 // not correct
+#define WHEEL_RADIUS 0.12
+
+
+// Motor Ctrl definitions
+double target_linear_velocity = 0.4398;
+
 uint32_t dirPins[6] = {PC4, PC12, PD2, PC11, PC2, PC10};
 uint32_t pwmPins[6] = {PA8, PB0, PA0, PA1, PB1, PB6};
 
@@ -68,8 +76,6 @@ void setup(){
         pinMode(pwmPins[i], OUTPUT);
         pinMode(encaPins[i], INPUT_PULLUP);
         pinMode(encbPins[i], INPUT_PULLUP);
-
-        setTps[i] = 500;
     }
     // Encoder Interrupts
     attachInterrupt(digitalPinToInterrupt(encaPins[0]), readEncoder0, RISING);
@@ -109,21 +115,46 @@ void loop(){
         }
         interrupts();
 
+        
+        double wl = 0; // Angular Velocity of Left
+        double wr = 0; // Angular Velocity of Right
+        
         double dt = (currT - prevT) / 1000.0;
         prevT = currT;
         for (int i = 0; i < 6; i++){
             tps[i] = ticks[i] / dt; // ticks/sec
+            // w = 2*pi*tps/encpr
+            if (i < 3){wl += 2*pi*tps[i]/ENCPR;}
+            else{wr += 2*pi*tps[i]/ENCPR;}
         }
-    
+        wl = wl/3;
+        wr = wr/3;
 
+        // read data from imu
+
+        // compute pid input->imu data vel set->target_angular_velocity
+        // setlwl-output and setwr+output
+
+        double setWl = target_linear_velocity/WHEEL_RADIUS;
+        double setWr = target_linear_velocity/WHEEL_RADIUS;
+        for (int i = 0; i < 6; i++){
+            if (i < 3){setTps[i] = setWl*ENCPR/(2*pi);}
+            else{setTps[i] = setWr*ENCPR/(2*pi);}
+        }
+        
+
+        // Computes the output for motors
         motor0.Compute();
         motor1.Compute();
         motor2.Compute();
         motor3.Compute();
         motor4.Compute();
         motor5.Compute();
+        for(int i = 0; i < 6; i++){
+            setMotor(i, pwm[i]);
+        }
 
-
+        double linear_vel = WHEEL_RADIUS*(wl + wr)/2;
         for (int i = 0; i < 6; i++){
             Serial.print("Motor");
             Serial.print(i);
@@ -134,10 +165,8 @@ void loop(){
         }
         Serial.println();
 
-        for (int i = 0; i < 6; i++){
-            setMotor(i, pwm[i]);
-        }
-        
+        Serial.print("Linear Velocity: ");
+        Serial.println(linear_vel);        
     }
 
     /*for (int i = -255; i < 256; i++){
