@@ -9,7 +9,7 @@
 
 
 // Motor Ctrl definitions
-double target_linear_velocity = 0.4398;
+double target_linear_velocity = 0.5;
 
 uint32_t dirPins[6] = {PC4, PC12, PD2, PC11, PC2, PC10};
 uint32_t pwmPins[6] = {PA8, PB0, PA0, PA1, PB1, PB6};
@@ -136,7 +136,7 @@ void loop(){
         // setlwl-output and setwr+output
 
         double setWl = target_linear_velocity/WHEEL_RADIUS;
-        double setWr = target_linear_velocity/WHEEL_RADIUS;
+        double setWr = -target_linear_velocity/WHEEL_RADIUS;
         for (int i = 0; i < 6; i++){
             if (i < 3){setTps[i] = setWl*ENCPR/(2*pi);}
             else{setTps[i] = setWr*ENCPR/(2*pi);}
